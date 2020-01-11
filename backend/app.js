@@ -106,3 +106,34 @@ app.post("/api/user", (req, res, next) => {
     });
 });
 
+app.get("/api/image/:user_id", (req,res,next)=>{
+
+    Image.find({user_id: req.params.user_id}).then(image=>{
+        res.json(image);
+    })
+
+})
+
+app.post("/api/image", multer({storage: storage}).single("image"), (req,res,next) => {
+    const url = req.protocol + '://' + req.get('host');
+    let imagePath = url + '/images/' + req.file.filename;
+    console.log(imagePath);
+
+    tesseract.recognize(
+        imagePath,
+        'eng',
+        { logger: m => console.log(m) }
+      ).then(({ data: { text } }) => {
+        const newImage = Image({
+            user_id: req.body.user_id,
+            image_url: imagePath,
+            img_result: text
+        
+          });
+          console.log(newImage);
+        newImage.save().then(res0=>{
+            res.json({text: text});
+        });
+      });
+});
+
