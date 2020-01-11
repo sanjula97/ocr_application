@@ -62,5 +62,47 @@ const storage = multer.diskStorage({
     }
 });
 
+app.get("/api/user", (req, res, next) => {
+    // console.log(req.query.user_name);
+    let oUser;
+    User.findOne({email: req.query.email}).then(user=>{
+        if(!user){
+            return res.json({message: 'AUTH FAILED!'});
+        }
+        oUser = user;
+        return bcrypt.compare(req.query.password, user.password);
+    }).then(res0=>{
+        if(!res0){
+            return res.json({message: 'AUTH FAILED!'});
+        }
+        const token = jwt.sign({email: req.query.email, user_id: oUser._id}, 'secret', {expiresIn: '1h'});
+        res.json({token: token, id: oUser._id, expiresIn: 3600});
+    });
 
+    
+});
+
+app.post("/api/user", (req, res, next) => {
+    User.findOne({ email: req.body.email }).then((ures) => {
+        if (!ures) {
+            return bcrypt.hash(req.body.password, 10).then(hash => {
+                const user = new User({
+                    email: req.body.email,
+                    password: hash
+                });
+                user.save().then(res0=>{
+                    return res.status(201).json({
+                        message: '201K SUCCESS!',
+                        user: res0
+                    });
+                });
+                // console.log(user);
+            }).catch(err => {
+                console.log(err);
+                res.status(500).json({ error: err });
+            });
+        }
+        res.status(403).json({ message: "ALREADY A USER EXIST!" });
+    });
+});
 
