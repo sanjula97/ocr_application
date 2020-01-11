@@ -137,6 +137,7 @@ app.post("/api/image", multer({storage: storage}).single("image"), (req,res,next
       });
 });
 
+
 app.delete("/api/image/:id", checkAuth, (req,res,next)=>{
     Image.deleteOne({_id: req.params.id}).then(res0=>{
         res.json({message: res0});
