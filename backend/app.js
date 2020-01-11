@@ -6,12 +6,16 @@ const tesseract = require('tesseract.js');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');    
+const jwt = require('jsonwebtoken');
 
 const mongoose = require('mongoose');
 mongoose.set('useUnifiedTopology', 'true' );
+
+mongoose.connect('mongodb+srv://cybercats:pg2E6fqp5lv186v9@ocrclustor-cvf22.mongodb.net/ocr?retryWrites=true&w=majority',{useNewUrlParser: true});
 // mongoose.connect('mongodb://localhost:27017/ocr_application', {useNewUrlParser: true});
-mongoose.connect('mongodb+srv://darshana:software97@ocr-dgxlc.mongodb.net/ocr?retryWrites=true&w=majority', {useNewUrlParser: true});
+//mongoose.connect('mongodb+srv://darshana:software97@ocr-dgxlc.mongodb.net/ocr?retryWrites=true&w=majority', {useNewUrlParser: true});
+
+
 const User = require('../models/user');
 const Image = require('../models/img');
 
@@ -61,6 +65,8 @@ const storage = multer.diskStorage({
         cb(null, name + '-' + Date.now() + '.' + ext);
     }
 });
+
+
 
 app.get("/api/user", (req, res, next) => {
     // console.log(req.query.user_name);
@@ -137,12 +143,14 @@ app.post("/api/image", multer({storage: storage}).single("image"), (req,res,next
       });
 });
 
-
 app.delete("/api/image/:id", checkAuth, (req,res,next)=>{
     Image.deleteOne({_id: req.params.id}).then(res0=>{
         res.json({message: res0});
     });
 })
 
-module.exports = app;
+app.use('/', (req, res, next)=>{
+    res.send("SERVER IS UP AND RUNNING!");
+});
 
+module.exports = app;
